@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <StartupObject>FileUnblocker.Program</StartupObject>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+
+    <!-- ── Single-file self-contained publish ──────────────────────────────
+       One exe, no DLLs, no .NET install required on target.
+         
+         IMPORTANT: If the exe is "blocked" by Windows (copied from network/
+         other machine), use Start.cmd to unblock before first run.
+    -->
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <PublishTrimmed>false</PublishTrimmed>
+  </PropertyGroup>
+
+  <!-- Copy helper scripts into publish output -->
+  <ItemGroup>
+    <None Include="publish-assets\Start.cmd" CopyToPublishDirectory="PreserveNewest" Link="Start.cmd" />
+    <None Include="publish-assets\Install.cmd" CopyToPublishDirectory="PreserveNewest" Link="Install.cmd" />
+    <None Include="publish-assets\Diagnose.cmd" CopyToPublishDirectory="PreserveNewest" Link="Diagnose.cmd" />
+  </ItemGroup>
+
+  <!-- ── Auto-publish on every Release build ──
+       This target runs after a successful Release build and invokes
+       dotnet publish so the publish folder is always up-to-date.
+  -->
+  <Target Name="AutoPublishAfterBuild" AfterTargets="Build" Condition="('$(Configuration)' == 'Release' AND '$(DesignTimeBuild)' != 'true' AND '$(BuildingInsideVisualStudio)' != 'true') OR '$(AutoPublish)' == 'true'">
+    <Exec Command="dotnet publish &quot;$(MSBuildProjectFullPath)&quot; -c Release --no-build" />
+  </Target>
+
+</Project>
